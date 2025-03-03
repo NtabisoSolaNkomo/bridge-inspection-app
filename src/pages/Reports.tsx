@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { SeverityBadge } from '@/components/ui/severity-badge';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { generateInspectionPDF, downloadPDF } from '@/utils/pdfGenerator';
 
 // Type definition for inspection data
-interface InspectionReport {
+export interface InspectionReport {
   id: string;
   bridgeName: string;
   location: string;
@@ -40,13 +40,11 @@ const Reports = () => {
   const [filteredReports, setFilteredReports] = useState<InspectionReport[]>([]);
 
   useEffect(() => {
-    // Load saved inspections from localStorage
     const savedInspections = JSON.parse(localStorage.getItem('bridgeInspections') || '[]');
     setReports(savedInspections);
   }, []);
 
   useEffect(() => {
-    // Filter reports based on search term
     if (!searchTerm.trim()) {
       setFilteredReports(reports);
     } else {
@@ -65,12 +63,17 @@ const Reports = () => {
   };
 
   const generatePDF = (report: InspectionReport) => {
-    // This would typically call a PDF generation service
-    // For now, we'll just show a success message
-    toast.success(`PDF report for ${report.bridgeName} has been generated`);
+    try {
+      const doc = generateInspectionPDF(report);
+      const filename = `${report.bridgeName.replace(/\s+/g, '_')}_inspection_${new Date().toISOString().split('T')[0]}.pdf`;
+      downloadPDF(doc, filename);
+      toast.success(`PDF report for ${report.bridgeName} has been downloaded`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
-  // Helper function to count issues by severity
   const countIssuesBySeverity = (report: InspectionReport) => {
     const counts = { minor: 0, moderate: 0, critical: 0 };
     
@@ -210,7 +213,7 @@ const Reports = () => {
                       onClick={() => generatePDF(report)}
                     >
                       <Download className="h-4 w-4" />
-                      Export PDF
+                      Download PDF
                     </Button>
                   </CardFooter>
                 </Card>
