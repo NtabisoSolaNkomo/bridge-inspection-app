@@ -197,8 +197,17 @@ export const generateInspectionPDF = (report: InspectionReport): jsPDF => {
   const photoWidth = 80;
   const photoHeight = 60;
   
-  report.items.forEach((item, index) => {
-    if (item.photoUrl) {
+  // Filter items with photos first
+  const itemsWithPhotos = report.items.filter(item => item.photoUrl);
+  console.log("Items with photos:", itemsWithPhotos.length);
+  
+  if (itemsWithPhotos.length === 0) {
+    doc.setFontSize(11);
+    doc.text('No photos available for this inspection.', 20, photoY + 10);
+  } else {
+    for (let i = 0; i < itemsWithPhotos.length; i++) {
+      const item = itemsWithPhotos[i];
+      
       // Check if we need to move to next page
       if (photoY + photoHeight > pageHeight - 20) {
         doc.addPage();
@@ -214,19 +223,51 @@ export const generateInspectionPDF = (report: InspectionReport): jsPDF => {
       }
       
       try {
-        // Add a placeholder for the image (in a real scenario, we'd use the actual URL)
+        // Add a placeholder for the image
         doc.setDrawColor(200, 200, 200);
         doc.setFillColor(245, 245, 245);
         doc.roundedRect(photoX, photoY, photoWidth, photoHeight, 2, 2, 'FD');
         
-        // Try to add the actual image if it starts with data:image
-        if (item.photoUrl.startsWith('data:image') || item.photoUrl.startsWith('blob:')) {
-          doc.addImage(item.photoUrl, 'JPEG', photoX, photoY, photoWidth, photoHeight);
-        } else {
-          // Draw a placeholder icon
-          doc.setFontSize(20);
-          doc.setTextColor(150, 150, 150);
-          doc.text('📷', photoX + photoWidth/2, photoY + photoHeight/2, { align: 'center' });
+        // Handle different types of image URLs
+        if (item.photoUrl) {
+          console.log("Processing photo:", item.photoUrl.substring(0, 30) + "...");
+          
+          if (item.photoUrl.startsWith('data:image')) {
+            // Handle data URLs directly
+            doc.addImage(
+              item.photoUrl, 
+              'JPEG', 
+              photoX, 
+              photoY, 
+              photoWidth, 
+              photoHeight
+            );
+            console.log("Added data URL image");
+          } else if (item.photoUrl.startsWith('blob:')) {
+            // For blob URLs, we need to handle them specially
+            try {
+              doc.addImage(
+                item.photoUrl, 
+                'JPEG', 
+                photoX, 
+                photoY, 
+                photoWidth, 
+                photoHeight
+              );
+              console.log("Added blob URL image");
+            } catch (error) {
+              console.error("Error adding blob image:", error);
+              // Draw placeholder icon on error
+              doc.setFontSize(20);
+              doc.setTextColor(150, 150, 150);
+              doc.text('📷', photoX + photoWidth/2, photoY + photoHeight/2, { align: 'center' });
+            }
+          } else {
+            // Draw placeholder icon for other URL types
+            doc.setFontSize(20);
+            doc.setTextColor(150, 150, 150);
+            doc.text('📷', photoX + photoWidth/2, photoY + photoHeight/2, { align: 'center' });
+          }
         }
         
         // Add caption
@@ -251,7 +292,7 @@ export const generateInspectionPDF = (report: InspectionReport): jsPDF => {
         maxHeightInRow = Math.max(maxHeightInRow, photoHeight);
       }
     }
-  });
+  }
   
   // Add footer with page numbers
   const pageCount = doc.getNumberOfPages();
