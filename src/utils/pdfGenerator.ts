@@ -138,6 +138,8 @@ export const generateInspectionPDF = (report: InspectionReport): jsPDF => {
     });
   });
   
+  let startY = 30;
+  
   if (tableData.length > 0) {
     doc.autoTable({
       startY: 30,
@@ -162,15 +164,19 @@ export const generateInspectionPDF = (report: InspectionReport): jsPDF => {
           cellWidth: 'auto'
         },
         4: { cellWidth: 'auto' }
+      },
+      didDrawPage: function(data) {
+        startY = data.cursor.y;
       }
     });
   }
   
   // Add photos section
-  let startY = doc.autoTable.previous.finalY + 20;
   if (startY > pageHeight - 60) {
     doc.addPage();
     startY = 30;
+  } else {
+    startY += 20;
   }
   
   // Photos title
