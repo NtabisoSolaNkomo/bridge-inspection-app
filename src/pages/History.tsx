@@ -6,20 +6,7 @@ import { Calendar, Clock, FileText } from "lucide-react";
 const History = () => {
   // Mock reports data - this would typically come from a database or localStorage
   const recentReports = [
-    {
-      id: "rep-1",
-      bridgeName: "Main Street Bridge",
-      date: "2023-05-16",
-      time: "4:45 PM",
-      type: "PDF Export"
-    },
-    {
-      id: "rep-2",
-      bridgeName: "Harbor Bridge",
-      date: "2023-05-11",
-      time: "10:30 AM",
-      type: "PDF Export"
-    }
+    
   ];
 
   return (

@@ -13,9 +13,9 @@ const Index = () => {
       <div className="max-w-4xl mx-auto space-y-8 py-8">
         <div className="text-center space-y-4 mb-12">
           <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            Professional Bridge Inspection Tool
+            Bridge Inspection App
           </div>
-          <h1 className="heading-1">Bridge Scan Pro</h1>
+          <h1 className="heading-1">Bridge Inspection App</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Streamline your bridge inspections with comprehensive documentation, 
             detailed reports, and professional analysis.
